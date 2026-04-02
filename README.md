@@ -1,6 +1,6 @@
 # SimpleBackup
 
-Plugin de WordPress para automatizar copias de seguridad con [All-in-One WP Migration](https://wordpress.org/plugins/all-in-one-wp-migration/). Permite programar backups, ejecutarlos manualmente, conservar un numero limitado de copias locales, enviar notificaciones por correo y subir las copias a Google Drive sin depender de la extension oficial de AI1WM.
+Plugin de WordPress para automatizar copias de seguridad con [All-in-One WP Migration](https://wordpress.org/plugins/all-in-one-wp-migration/). Permite programar backups, ejecutarlos manualmente, conservar un numero limitado de copias locales, enviar notificaciones por correo y subir las copias a Google Drive sin depender de la extension Pro de All-in-One WP Migration.
 
 ## Que hace este plugin
 
