@@ -143,16 +143,11 @@ SimpleBackup gestiona la limpieza local en dos niveles:
 
 ## Actualizaciones del plugin
 
-El plugin incluye un verificador de actualizaciones propio que consulta:
+WordPress consulta el [manifiesto de SimpleBackup](https://repo.gorvet.com/updates/simplebackup/info.json).
+Cuando hay una versión más reciente con un paquete disponible, WordPress muestra el aviso de actualización.
+Para instalar nuevas versiones en segundo plano, activa **Activar las actualizaciones automáticas** en la fila de SimpleBackup en **Plugins**.
 
-- `https://repo.gorvet.com/updates/simplebackup/info.json`
-
-Desde ese endpoint puede obtener:
-
-- versión nueva
-- paquete descargable
-- changelog o secciones informativas
-- requisitos de WordPress y PHP
+El paquete publicado debe conservar la ruta interna simplebackup/simplebackup.php para actualizar la instalación existente.
 
 ## Que no hace
 

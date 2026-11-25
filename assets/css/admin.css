@@ -1,0 +1,70 @@
+.simplebackup-list {
+    max-width: 1000px;
+    margin: 12px 0 24px;
+}
+.simplebackup-actions {
+    position: relative;
+    display: inline-flex;
+    justify-content: flex-end;
+}
+.simplebackup-actions-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #dcdcde;
+    border-radius: 999px;
+    background: #fff;
+    color: #1d2327;
+    cursor: pointer;
+}
+.simplebackup-actions-toggle:hover,
+.simplebackup-actions-toggle[aria-expanded="true"] {
+    border-color: #2271b1;
+    color: #2271b1;
+}
+.simplebackup-actions-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 20;
+    min-width: 220px;
+    padding: 8px;
+    border: 1px solid #dcdcde;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    display: none;
+}
+.simplebackup-actions.is-open .simplebackup-actions-menu {
+    display: block;
+}
+.simplebackup-actions-menu a,
+.simplebackup-actions-menu button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #1d2327;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+.simplebackup-actions-menu a:hover,
+.simplebackup-actions-menu button:hover {
+    background: #f0f6fc;
+    color: #2271b1;
+}
+.simplebackup-actions-menu form {
+    margin: 0;
+}
+.simplebackup-actions-menu .is-danger:hover {
+    background: #fcf0f1;
+    color: #b32d2e;
+}

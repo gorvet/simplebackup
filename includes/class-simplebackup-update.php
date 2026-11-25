@@ -4,94 +4,104 @@ defined( 'ABSPATH' ) || exit;
 
 class SIMPLEBACKUP_Update {
 
+    private const SLUG = 'simplebackup';
+    private const LEGACY_SLUG = 'simplebackup-ai1wm';
+
     public static function init() {
         add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check_for_updates' ) );
         add_filter( 'plugins_api', array( __CLASS__, 'plugins_api' ), 10, 3 );
     }
 
     public static function check_for_updates( $transient ) {
-        if ( empty( $transient->checked ) ) {
+        if ( ! isset( $transient->checked[ SIMPLEBACKUP_SLUG ] ) ) {
             return $transient;
         }
 
+        $installed_version = $transient->checked[ SIMPLEBACKUP_SLUG ];
         $info = self::fetch_remote_info();
-        if ( empty( $info ) || empty( $info->version ) ) {
-            return $transient;
-        }
 
-        if ( version_compare( $info->version, SIMPLEBACKUP_VERSION, '>' ) ) {
-            $transient->response[ SIMPLEBACKUP_SLUG ] = (object) array(
-                'slug'          => ! empty( $info->slug ) ? $info->slug : 'simplebackup-ai1wm',
-                'plugin'        => SIMPLEBACKUP_SLUG,
-                'new_version'   => $info->version,
-                'url'           => ! empty( $info->homepage ) ? $info->homepage : '',
-                'package'       => ! empty( $info->download_url ) ? $info->download_url : '',
-                'tested'        => ! empty( $info->tested ) ? $info->tested : '6.8.2',
-                'requires'      => ! empty( $info->requires ) ? $info->requires : '5.8',
-                'requires_php'  => ! empty( $info->requires_php ) ? $info->requires_php : '7.4',
-                'icons'         => array(
-                    'default' => ! empty( $info->icon ) ? $info->icon : SIMPLEBACKUP_URL . 'assets/icon.png',
-                ),
-                'upgrade_notice' => ! empty( $info->upgrade_notice ) ? $info->upgrade_notice : __( 'Recommended update for stability and security.', 'simplebackup' ),
-            );
+        $offer = (object) array(
+            'id'           => SIMPLEBACKUP_UPDATE_INFO_URL,
+            'slug'         => self::SLUG,
+            'plugin'       => SIMPLEBACKUP_SLUG,
+            'new_version'  => $info->version ?? $installed_version,
+            'url'          => $info->homepage ?? 'https://github.com/gorvet/simplebackup',
+            'package'      => $info->download_url ?? '',
+            'tested'       => $info->tested ?? '6.8',
+            'requires'     => $info->requires ?? '5.8',
+            'requires_php' => $info->requires_php ?? '7.4',
+            'icons'        => array( 'default' => $info->icon ?? SIMPLEBACKUP_URL . 'assets/icon.png' ),
+        );
+
+        unset( $transient->response[ SIMPLEBACKUP_SLUG ], $transient->no_update[ SIMPLEBACKUP_SLUG ] );
+
+        if ( $info && version_compare( $info->version, $installed_version, '>' ) ) {
+            $offer->upgrade_notice = $info->upgrade_notice ?? '';
+            $transient->response[ SIMPLEBACKUP_SLUG ] = $offer;
+        } else {
+            $transient->no_update[ SIMPLEBACKUP_SLUG ] = $offer;
         }
 
         return $transient;
     }
 
     public static function plugins_api( $result, $action, $args ) {
-        if ( 'plugin_information' !== $action || empty( $args->slug ) || 'simplebackup-ai1wm' !== $args->slug ) {
+        if ( 'plugin_information' !== $action || ! in_array( $args->slug ?? '', array( self::SLUG, self::LEGACY_SLUG ), true ) ) {
             return $result;
         }
 
         $info = self::fetch_remote_info();
-        if ( empty( $info ) || empty( $info->version ) ) {
+        if ( ! $info ) {
             return $result;
         }
 
         return (object) array(
-            'name'          => ! empty( $info->name ) ? $info->name : 'SimpleBackup',
-            'slug'          => ! empty( $info->slug ) ? $info->slug : 'simplebackup-ai1wm',
+            'name'          => $info->name ?? 'SimpleBackup',
+            'slug'          => self::SLUG,
             'version'       => $info->version,
-            'author'        => ! empty( $info->author ) ? $info->author : 'Juank de Gorvet',
-            'requires'      => ! empty( $info->requires ) ? $info->requires : '5.8',
-            'tested'        => ! empty( $info->tested ) ? $info->tested : '6.8.2',
-            'requires_php'  => ! empty( $info->requires_php ) ? $info->requires_php : '7.4',
-            'last_updated'  => ! empty( $info->last_updated ) ? $info->last_updated : gmdate( 'Y-m-d' ),
-            'sections'      => ! empty( $info->sections ) ? (array) $info->sections : array(
+            'author'        => $info->author ?? 'Juank de Gorvet',
+            'requires'      => $info->requires ?? '5.8',
+            'tested'        => $info->tested ?? '6.8',
+            'requires_php'  => $info->requires_php ?? '7.4',
+            'last_updated'  => $info->last_updated ?? '',
+            'sections'      => (array) ( $info->sections ?? array(
                 'description' => __( 'SimpleBackup addon for All-in-One WP Migration.', 'simplebackup' ),
-            ),
-            'homepage'      => ! empty( $info->homepage ) ? $info->homepage : '',
-            'download_link' => ! empty( $info->download_url ) ? $info->download_url : '',
-            'banners'       => ! empty( $info->banners ) ? (array) $info->banners : array(),
+            ) ),
+            'homepage'      => $info->homepage ?? 'https://github.com/gorvet/simplebackup',
+            'download_link' => $info->download_url,
+            'banners'       => (array) ( $info->banners ?? array() ),
         );
     }
 
     private static function fetch_remote_info() {
-        if ( empty( SIMPLEBACKUP_UPDATE_INFO_URL ) ) {
+        static $info = false;
+        if ( false !== $info ) {
+            return $info;
+        }
+
+        $info = null;
+        $response = wp_safe_remote_get( SIMPLEBACKUP_UPDATE_INFO_URL, array( 'timeout' => 5 ) );
+        if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
             return null;
         }
 
-        $response = wp_remote_get( SIMPLEBACKUP_UPDATE_INFO_URL, array( 'timeout' => 5 ) );
-        if ( is_wp_error( $response ) ) {
+        $data = json_decode( wp_remote_retrieve_body( $response ) );
+        if ( ! is_object( $data ) || ! isset( $data->version, $data->download_url ) ||
+            ! is_string( $data->version ) || ! preg_match( '/^\d+(?:\.\d+)+(?:[-+][a-z0-9][a-z0-9.+-]*)?$/iD', $data->version ) ||
+            ! is_string( $data->download_url ) || ! filter_var( $data->download_url, FILTER_VALIDATE_URL ) ||
+            'https' !== wp_parse_url( $data->download_url, PHP_URL_SCHEME ) ||
+            ! in_array( $data->slug ?? self::SLUG, array( self::SLUG, self::LEGACY_SLUG ), true )
+        ) {
             return null;
         }
 
-        $code = (int) wp_remote_retrieve_response_code( $response );
-        if ( 200 !== $code ) {
-            return null;
+        foreach ( array( 'name', 'author', 'homepage', 'requires', 'tested', 'requires_php', 'last_updated', 'icon', 'upgrade_notice' ) as $field ) {
+            if ( isset( $data->$field ) && ( ! is_string( $data->$field ) || '' === $data->$field ) ) {
+                unset( $data->$field );
+            }
         }
 
-        $body = wp_remote_retrieve_body( $response );
-        if ( empty( $body ) ) {
-            return null;
-        }
-
-        $data = json_decode( $body );
-        if ( ! is_object( $data ) ) {
-            return null;
-        }
-
-        return $data;
+        $info = $data;
+        return $info;
     }
 }

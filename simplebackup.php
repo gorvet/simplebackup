@@ -2,8 +2,8 @@
 /**
  * Plugin Name: SimpleBackup
  * Plugin URI: https://www.gorvet.com
- * Description: Addon independiente para automatizar backups con All-in-One WP Migration: horario, frecuencia, notificaciones y opcion de Google Drive.
- * Version: 1.0.0
+ * Description: Addon independiente para automatizar backups con All-in-One WP Migration: horario, frecuencia, notificaciones y opción de Google Drive.
+ * Version: 1.0.1
  * Author: Juank de Gorvet
  * Author URI: https://api.whatsapp.com/send/?phone=5353779424
  * License: GPLv2 or later
@@ -13,6 +13,7 @@
  * Requires at least: 5.8
  * Tested up to: 6.8
  * Requires PHP: 7.4
+ * Update URI: https://repo.gorvet.com/updates/simplebackup/info.json
  *
  * @package SimpleBackup
  */
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'SIMPLEBACKUP_VERSION', '1.0.0' );
+define( 'SIMPLEBACKUP_VERSION', '1.0.1' );
 define( 'SIMPLEBACKUP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SIMPLEBACKUP_URL', plugin_dir_url( __FILE__ ) );
 define( 'SIMPLEBACKUP_SLUG', plugin_basename( __FILE__ ) );
